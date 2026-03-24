@@ -17,7 +17,8 @@ if (!string.IsNullOrEmpty(databaseUrl))
     // Parse Render's DATABASE_URL (postgres://user:pass@host:port/dbname)
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
-    var npgsqlConn = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+    var dbPort = uri.Port > 0 ? uri.Port : 5432;
+    var npgsqlConn = $"Host={uri.Host};Port={dbPort};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
 
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(npgsqlConn));
