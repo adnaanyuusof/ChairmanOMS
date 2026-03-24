@@ -1,0 +1,62 @@
+@model ChairmanOMS.Models.OutgoingDocument
+@{
+    ViewData["Title"] = "Edit Outgoing Document";
+}
+
+<div class="row justify-content-center mt-2">
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">Edit Outgoing Document (@Model.ReferenceNumber)</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ReferenceNumber" class="form-label text-muted small fw-bold"></label>
+                            <input asp-for="ReferenceNumber" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DestinationInstitution" class="form-label text-muted small fw-bold"></label>
+                            <input asp-for="DestinationInstitution" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Subject" class="form-label text-muted small fw-bold"></label>
+                        <input asp-for="Subject" class="form-control" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="DateSent" class="form-label text-muted small fw-bold"></label>
+                            <input asp-for="DateSent" type="date" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="LinkedIncomingDocumentId" class="form-label text-muted small fw-bold">Link to Incoming</label>
+                            <select asp-for="LinkedIncomingDocumentId" asp-items="@ViewBag.IncomingDocs" class="form-select">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+                         <div class="col-md-4 mb-3">
+                            <label asp-for="Status" class="form-label text-muted small fw-bold"></label>
+                            <select asp-for="Status" class="form-select" asp-items="@ViewBag.Statuses"></select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Update Attachment (Optional)</label>
+                        <input type="file" name="attachment" class="form-control" accept=".pdf,.docx,.doc" />
+                        @if (!string.IsNullOrEmpty(Model.AttachmentPath))
+                        {
+                            <small class="text-muted d-block mt-1">Current: <a href="@Model.AttachmentPath" target="_blank">View File</a></small>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light">Cancel</a>
+                        <button type="submit" class="btn btn-success">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,88 @@
+@model IEnumerable<ChairmanOMS.Models.OutgoingDocument>
+@{
+    ViewData["Title"] = "Outgoing Documents";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+    <h2 class="fw-bold mb-0">Outgoing Documents</h2>
+    @if (User.IsInRole("Admin") || User.IsInRole("Chairman") || User.IsInRole("Secretary"))
+    {
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i> Issue Document
+        </a>
+    }
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by subject, destination or ref#…" />
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select" asp-items="@ViewBag.Statuses">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-success flex-fill">Filter</button>
+                <a asp-action="Index" class="btn btn-light">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Ref #</th>
+                    <th>Destination</th>
+                    <th>Subject</th>
+                    <th>Linked Incoming</th>
+                    <th>Date Sent</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var doc in Model)
+                {
+                    var sClass = doc.Status == "Sent" ? "bg-info text-dark" : doc.Status == "Delivered" ? "bg-success" : doc.Status == "Approved" ? "bg-primary" : "bg-warning text-dark";
+                    <tr>
+                        <td class="ps-3"><code>@doc.ReferenceNumber</code></td>
+                        <td>@doc.DestinationInstitution</td>
+                        <td><a asp-action="Details" asp-route-id="@doc.Id" class="text-decoration-none fw-medium text-success">@doc.Subject</a></td>
+                        <td>
+                            @if (doc.LinkedIncomingDocument != null)
+                            {
+                                <a asp-controller="IncomingDocuments" asp-action="Details" asp-route-id="@doc.LinkedIncomingDocumentId" class="badge bg-light text-dark border text-decoration-none">
+                                    <i class="bi bi-link me-1"></i>@doc.LinkedIncomingDocument.ReferenceNumber
+                                </a>
+                            }
+                            else
+                            {
+                                <small class="text-muted">-</small>
+                            }
+                        </td>
+                        <td>@doc.DateSent.ToShortDateString()</td>
+                        <td><span class="badge @sClass">@doc.Status</span></td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-success">View</a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Chairman") || User.IsInRole("Secretary"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">No documents found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

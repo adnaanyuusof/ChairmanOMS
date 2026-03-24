@@ -1,0 +1,47 @@
+@model ChairmanOMS.Models.TaskItem
+@{
+    ViewData["Title"] = "Create Task";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">Create New Task</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label text-muted fw-bold">Task Title</label>
+                        <input asp-for="Title" class="form-control" required placeholder="To-do action..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label text-muted fw-bold">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Optional details..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AssignedToUserId" class="form-label text-muted fw-bold">Assign To (Optional)</label>
+                            <select asp-for="AssignedToUserId" class="form-select" asp-items="@ViewBag.Users">
+                                <option value="">-- Select Member --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DueDate" class="form-label text-muted fw-bold">Due Date</label>
+                            <input asp-for="DueDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-light">Cancel</a>
+                        <button type="submit" class="btn btn-warning text-dark fw-bold">Create Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+@model ChairmanOMS.Models.IncomingDocument
+@{
+    ViewData["Title"] = "Register Incoming Document";
+}
+
+<div class="row justify-content-center mt-2">
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">Register Incoming Document</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ReferenceNumber" class="form-label text-muted small fw-bold"></label>
+                            <input asp-for="ReferenceNumber" class="form-control" required placeholder="e.g. CSC/IN/2026/001" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SourceInstitution" class="form-label text-muted small fw-bold"></label>
+                            <input asp-for="SourceInstitution" class="form-control" required placeholder="Ministry of Finance" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Subject" class="form-label text-muted small fw-bold"></label>
+                        <input asp-for="Subject" class="form-control" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="DateReceived" class="form-label text-muted small fw-bold"></label>
+                            <input asp-for="DateReceived" type="date" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Priority" class="form-label text-muted small fw-bold"></label>
+                            <select asp-for="Priority" class="form-select">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="AssignedToUserId" class="form-label text-muted small fw-bold">Assign To</label>
+                            <select asp-for="AssignedToUserId" asp-items="@ViewBag.Users" class="form-select">
+                                <option value="">-- Unassigned --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Attachment (PDF / DOCX)</label>
+                        <input type="file" name="attachment" class="form-control" accept=".pdf,.docx,.doc" />
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Register Document</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

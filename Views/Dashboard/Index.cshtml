@@ -1,0 +1,483 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var incomingByStatus = ViewBag.IncomingByStatus as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .stat-card-body {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-icon.incoming { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stat-icon.outgoing { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .stat-icon.pending { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .stat-icon.priority { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+    .stat-icon i { color: #fff; }
+
+    .stat-info .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-info .stat-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .modern-card {
+        background: #fff;
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .card-header-modern {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-header-modern h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header-modern h5 i {
+        color: var(--primary-color);
+    }
+
+    .modern-table {
+        margin: 0;
+    }
+
+    .modern-table thead th {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.75rem 1rem;
+    }
+
+    .modern-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .modern-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ref-badge {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-family: monospace;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .priority-badge {
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .priority-high { background: #fee2e2; color: #dc2626; }
+    .priority-medium { background: #fef3c7; color: #d97706; }
+    .priority-low { background: #e2e8f0; color: #64748b; }
+
+    .status-badge {
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-new { background: #dbeafe; color: #2563eb; }
+    .status-review { background: #fef3c7; color: #d97706; }
+    .status-approved { background: #d1fae5; color: #059669; }
+    .status-rejected { background: #fee2e2; color: #dc2626; }
+    .status-delivered { background: #d1fae5; color: #059669; }
+    .status-sent { background: #e0e7ff; color: #4f46e5; }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.create { background: #d1fae5; color: #059669; }
+    .activity-icon.update { background: #dbeafe; color: #2563eb; }
+    .activity-icon.delete { background: #fee2e2; color: #dc2626; }
+    .activity-icon.login { background: #e0e7ff; color: #4f46e5; }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-content small {
+        color: #475569;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 240px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .greeting-card {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+    }
+
+    .greeting-card h4 {
+        margin: 0 0 0.25rem 0;
+        font-weight: 600;
+    }
+
+    .greeting-card p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="greeting-card">
+    <h4>Welcome back, @User.Identity.Name!</h4>
+    <p>Here's what's happening with your documents today.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-icon incoming">
+                    <i class="bi bi-inbox-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">@ViewBag.TotalIncoming</div>
+                    <div class="stat-label">Incoming Docs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-icon outgoing">
+                    <i class="bi bi-send-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">@ViewBag.TotalOutgoing</div>
+                    <div class="stat-label">Outgoing Docs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-icon pending">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">@ViewBag.PendingApprovals</div>
+                    <div class="stat-label">Pending Approvals</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-body">
+                <div class="stat-icon priority">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">@ViewBag.HighPriority</div>
+                    <div class="stat-label">High Priority</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="bi bi-inbox"></i> Recent Incoming Documents</h5>
+                <a asp-controller="IncomingDocuments" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table modern-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ref #</th>
+                            <th>Source</th>
+                            <th>Subject</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var doc in ViewBag.RecentIncoming)
+                        {
+                            <tr>
+                                <td><span class="ref-badge">@doc.ReferenceNumber</span></td>
+                                <td class="fw-medium">@doc.SourceInstitution</td>
+                                <td>
+                                    <a asp-controller="IncomingDocuments" asp-action="Details" asp-route-id="@doc.Id" class="text-decoration-none text-dark">
+                                        @(doc.Subject.Length > 40 ? doc.Subject.Substring(0, 40) + "..." : doc.Subject)
+                                    </a>
+                                </td>
+                                <td>
+                                    @{
+                                        var pClass = doc.Priority == "High" ? "priority-high" : doc.Priority == "Medium" ? "priority-medium" : "priority-low";
+                                    }
+                                    <span class="priority-badge @pClass">@doc.Priority</span>
+                                </td>
+                                <td>
+                                    @{
+                                        var sClass = doc.Status switch {
+                                            "New" => "status-new",
+                                            "Under Review" => "status-review",
+                                            "Approved" => "status-approved",
+                                            "Rejected" => "status-rejected",
+                                            _ => "status-new"
+                                        };
+                                    }
+                                    <span class="status-badge @sClass">@doc.Status</span>
+                                </td>
+                            </tr>
+                        }
+                        @if (((IEnumerable<object>)ViewBag.RecentIncoming).Count() == 0)
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-4">No documents yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="modern-card h-100">
+            <div class="card-header-modern">
+                <h5><i class="bi bi-pie-chart"></i> Documents by Status</h5>
+            </div>
+            <div class="chart-container p-3">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="bi bi-send"></i> Recent Outgoing Documents</h5>
+                <a asp-controller="OutgoingDocuments" asp-action="Index" class="btn btn-sm btn-outline-success">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table modern-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ref #</th>
+                            <th>Destination</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var doc in ViewBag.RecentOutgoing)
+                        {
+                            <tr>
+                                <td><span class="ref-badge">@doc.ReferenceNumber</span></td>
+                                <td class="fw-medium">@doc.DestinationInstitution</td>
+                                <td>
+                                    @{
+                                        var outSClass = doc.Status switch {
+                                            "Delivered" => "status-delivered",
+                                            "Sent" => "status-sent",
+                                            "Approved" => "status-approved",
+                                            _ => "status-new"
+                                        };
+                                    }
+                                    <span class="status-badge @outSClass">@doc.Status</span>
+                                </td>
+                                <td class="text-muted">@doc.DateSent.ToString("MMM d, yyyy")</td>
+                            </tr>
+                        }
+                        @if (((IEnumerable<object>)ViewBag.RecentOutgoing).Count() == 0)
+                        {
+                            <tr><td colspan="4" class="text-center text-muted py-4">No documents yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="bi bi-activity"></i> Recent Activity</h5>
+            </div>
+            <div class="p-0" style="max-height: 320px; overflow-y: auto;">
+                @foreach (var log in ViewBag.RecentLogs)
+                {
+                    var iconClass = log.ActionType?.ToString().ToLower() switch {
+                        "create" => "create",
+                        "update" => "update",
+                        "delete" => "delete",
+                        "login" => "login",
+                        _ => "update"
+                    };
+                    var icon = log.ActionType?.ToString().ToLower() switch {
+                        "create" => "bi-plus",
+                        "update" => "bi-pencil",
+                        "delete" => "bi-trash",
+                        "login" => "bi-box-arrow-in-right",
+                        _ => "bi-circle"
+                    };
+                    <div class="activity-item">
+                        <div class="activity-icon @iconClass">
+                            <i class="bi @icon"></i>
+                        </div>
+                        <div class="activity-content">
+                            <small>@log.Description</small>
+                            <div class="text-muted" style="font-size: 0.75rem;">@log.CreatedAt.ToString("MMM d, yyyy 'at' HH:mm")</div>
+                        </div>
+                    </div>
+                }
+                @if (((IEnumerable<object>)ViewBag.RecentLogs).Count() == 0)
+                {
+                    <div class="text-center text-muted py-4">No activity yet.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+    (function () {
+        var statusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            ((IEnumerable<object>)ViewBag.IncomingByStatus).Select(s => new {
+                status = s.GetType().GetProperty("Status")?.GetValue(s, null)?.ToString(),
+                count = (int)(s.GetType().GetProperty("Count")?.GetValue(s, null) ?? 0)
+            })
+        ));
+        var labels = statusData.map(d => d.status);
+        var data = statusData.map(d => d.count);
+        var ctx = document.getElementById('statusChart').getContext('2d');
+        
+        var colors = [
+            '#667eea', '#f5576c', '#11998e', '#fee140', '#667eea'
+        ];
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: { 
+                    legend: { 
+                        position: 'bottom', 
+                        labels: { 
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        } 
+                    }
+                }
+            }
+        });
+    })();
+</script>
+}

@@ -1,0 +1,24 @@
+@using Microsoft.AspNetCore.Identity
+@using ChairmanOMS.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item d-flex align-items-center me-3">
+        <span class="text-dark">Hello, @(UserManager.GetUserAsync(User).Result?.FirstName ?? User.Identity?.Name)!</span>
+    </li>
+    <li class="nav-item">
+        <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+    </li>
+}
+</ul>

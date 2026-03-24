@@ -1,0 +1,85 @@
+@model IEnumerable<ChairmanOMS.Models.IncomingDocument>
+@{
+    ViewData["Title"] = "Incoming Documents";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+    <h2 class="fw-bold mb-0">Incoming Documents</h2>
+    @if (User.IsInRole("Admin") || User.IsInRole("Secretary") || User.IsInRole("Records Officer"))
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Register Document
+        </a>
+    }
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by subject, source or ref#…" />
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select" asp-items="@ViewBag.Statuses">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="priority" class="form-select" asp-items="@ViewBag.Priorities">
+                    <option value="">All Priorities</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">Filter</button>
+                <a asp-action="Index" class="btn btn-light">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Ref #</th>
+                    <th>Source</th>
+                    <th>Subject</th>
+                    <th>Date Received</th>
+                    <th>Priority</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var doc in Model)
+                {
+                    var pClass = doc.Priority == "High" ? "bg-danger" : doc.Priority == "Medium" ? "bg-warning text-dark" : "bg-secondary";
+                    var sClass = doc.Status == "Approved" ? "bg-success" : doc.Status == "Rejected" ? "bg-danger" : doc.Status == "Archived" ? "bg-dark" : doc.Status == "UnderReview" ? "bg-info text-dark" : "bg-primary";
+                    <tr>
+                        <td class="ps-3"><code>@doc.ReferenceNumber</code></td>
+                        <td>@doc.SourceInstitution</td>
+                        <td><a asp-action="Details" asp-route-id="@doc.Id" class="text-decoration-none fw-medium">@doc.Subject</a></td>
+                        <td>@doc.DateReceived.ToShortDateString()</td>
+                        <td><span class="badge @pClass">@doc.Priority</span></td>
+                        <td><small>@(doc.AssignedToUser?.Email ?? "Unassigned")</small></td>
+                        <td><span class="badge @sClass">@doc.Status</span></td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary">View</a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Secretary") || User.IsInRole("Records Officer"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-4">No documents found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
