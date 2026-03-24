@@ -5,18 +5,31 @@ using ChairmanOMS.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Bind to PORT env var for Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5151";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-if (string.IsNullOrEmpty(connectionString))
+// Database configuration: Use PostgreSQL on Render, SQL Server locally
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrEmpty(databaseUrl))
 {
-    connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
-        ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-}
+    // Parse Render's DATABASE_URL (postgres://user:pass@host:port/dbname)
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    var npgsqlConn = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(npgsqlConn));
+}
+else
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount = false;
@@ -35,7 +48,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -48,11 +65,15 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+// Seed roles and admin user, and auto-migrate on Render
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate(); // Auto-apply migrations on startup
+
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
         await DbInitializer.InitializeAsync(userManager, roleManager);
@@ -60,7 +81,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred creating the DB rules.");
+        logger.LogError(ex, "An error occurred during DB migration/seeding.");
     }
 }
 

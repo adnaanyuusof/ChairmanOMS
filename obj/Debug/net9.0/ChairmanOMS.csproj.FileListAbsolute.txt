@@ -218,3 +218,7 @@ C:\Users\mrwhite\Music\clinc\ChairmanOMS\obj\Debug\net9.0\ChairmanOMS.pdb
 C:\Users\mrwhite\Music\clinc\ChairmanOMS\obj\Debug\net9.0\ChairmanOMS.genruntimeconfig.cache
 C:\Users\mrwhite\Music\clinc\ChairmanOMS\obj\Debug\net9.0\ref\ChairmanOMS.dll
 C:\Users\mrwhite\Music\clinc\ChairmanOMS\obj\Debug\net9.0\compressed\vie6peoahd-ku4f3sv297.gz
+C:\Users\mrwhite\Music\clinc\ChairmanOMS\bin\Debug\net9.0\appsettings.Production.json
+C:\Users\mrwhite\Music\clinc\ChairmanOMS\bin\Debug\net9.0\Npgsql.dll
+C:\Users\mrwhite\Music\clinc\ChairmanOMS\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\mrwhite\Music\clinc\ChairmanOMS\obj\Debug\net9.0\ChairmanOMS.sourcelink.json
