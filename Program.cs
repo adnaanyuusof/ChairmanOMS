@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using ChairmanOMS.Data;
 using ChairmanOMS.Models;
 
+// Enable legacy timestamp behavior for PostgreSQL to avoid DateTime Unspecified errors
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Bind to PORT env var for Render
