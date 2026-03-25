@@ -62,6 +62,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseStaticFiles(); // Required to serve runtime uploads
 app.MapStaticAssets();
 
 app.MapControllerRoute(
