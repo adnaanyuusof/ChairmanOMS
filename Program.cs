@@ -84,7 +84,35 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         
-        // Auto-apply migrations for all providers
+        // Raw SQL for missing columns to be 100% sure - Run BEFORE Migrate
+        var connection = context.Database.GetDbConnection();
+        connection.Open();
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = @"
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""Purpose"" text;
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""ReceiverName"" text;
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""UnderProcessBy"" text;
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""HandedTo"" text;
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""Other"" text;
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""DepartureDate"" timestamp without time zone;
+                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""DateOfReturn"" timestamp without time zone;
+
+                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""ConveyerName"" text;
+                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""PhoneNumber"" text;
+                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""ReceiverName"" text;
+                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""LinkedIncomingDocumentId"" integer;
+
+                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""Masuulka"" text;
+                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""VisitorStatus"" text;
+                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CheckInTime"" timestamp without time zone;
+                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CheckOutTime"" timestamp without time zone;
+                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CreatedById"" text;
+            ";
+            cmd.ExecuteNonQuery();
+        }
+
+        // Auto-apply migrations
         context.Database.Migrate(); 
 
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
