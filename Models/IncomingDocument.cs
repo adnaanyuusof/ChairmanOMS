@@ -15,6 +15,15 @@ namespace ChairmanOMS.Models
         public ApplicationUser? AssignedToUser { get; set; }
         public string Status { get; set; } = "Received"; // Received, UnderReview, Approved, Rejected, Archived
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Additional workflow fields
+        public string? Purpose { get; set; }
+        public string? ReceiverName { get; set; }
+        public string? UnderProcessBy { get; set; }
+        public string? HandedTo { get; set; }
+        public string? Other { get; set; }
+        public DateTime? DepartureDate { get; set; }
+        public DateTime? DateOfReturn { get; set; }
         
         public ICollection<WorkflowAction> WorkflowActions { get; set; } = new List<WorkflowAction>();
     }

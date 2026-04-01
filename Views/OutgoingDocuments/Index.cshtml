@@ -35,12 +35,16 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <table class="table table-hover mb-0 align-middle">
+        <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle small">
             <thead class="table-light">
                 <tr>
                     <th class="ps-3">Ref #</th>
                     <th>Destination</th>
                     <th>Subject</th>
+                    <th>Conveyer</th>
+                    <th>Phone</th>
+                    <th>Receiver</th>
                     <th>Linked Incoming</th>
                     <th>Date Sent</th>
                     <th>Status</th>
@@ -55,6 +59,9 @@
                         <td class="ps-3"><code>@doc.ReferenceNumber</code></td>
                         <td>@doc.DestinationInstitution</td>
                         <td><a asp-action="Details" asp-route-id="@doc.Id" class="text-decoration-none fw-medium text-success">@doc.Subject</a></td>
+                        <td>@(string.IsNullOrEmpty(doc.ConveyerName) ? "—" : doc.ConveyerName)</td>
+                        <td>@(string.IsNullOrEmpty(doc.PhoneNumber) ? "—" : doc.PhoneNumber)</td>
+                        <td>@(string.IsNullOrEmpty(doc.ReceiverName) ? "—" : doc.ReceiverName)</td>
                         <td>
                             @if (doc.LinkedIncomingDocument != null)
                             {
@@ -70,19 +77,29 @@
                         <td>@doc.DateSent.ToShortDateString()</td>
                         <td><span class="badge @sClass">@doc.Status</span></td>
                         <td>
-                            <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-success">View</a>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Chairman") || User.IsInRole("Secretary"))
-                            {
-                                <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
-                            }
+                             <div class="d-flex gap-1 flex-nowrap">
+                                <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-success">View</a>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Chairman") || User.IsInRole("Secretary"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form asp-action="Delete" asp-route-id="@doc.Id" method="post"
+                                          onsubmit="return confirm('Delete document @doc.ReferenceNumber? This cannot be undone.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                }
+                            </div>
                         </td>
                     </tr>
                 }
                 @if (!Model.Any())
                 {
-                    <tr><td colspan="7" class="text-center text-muted py-4">No documents found.</td></tr>
+                    <tr><td colspan="10" class="text-center text-muted py-4">No documents found.</td></tr>
                 }
             </tbody>
         </table>
+        </div>
     </div>
 </div>

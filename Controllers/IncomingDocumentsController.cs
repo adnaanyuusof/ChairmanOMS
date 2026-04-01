@@ -33,7 +33,13 @@ namespace ChairmanOMS.Controllers
             if (!string.IsNullOrEmpty(priority))
                 query = query.Where(d => d.Priority == priority);
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(d => d.Subject.Contains(search) || d.SourceInstitution.Contains(search) || d.ReferenceNumber.Contains(search));
+            {
+                var s = search.ToLower();
+                query = query.Where(d => d.Subject.ToLower().Contains(s) || 
+                                         d.SourceInstitution.ToLower().Contains(s) || 
+                                         d.ReferenceNumber.ToLower().Contains(s) || 
+                                         (d.Purpose != null && d.Purpose.ToLower().Contains(s)));
+            }
 
             ViewBag.Statuses = new SelectList(new[] { "Received", "UnderReview", "Approved", "Rejected", "Archived" });
             ViewBag.Priorities = new SelectList(new[] { "Low", "Medium", "High" });
@@ -144,6 +150,13 @@ namespace ChairmanOMS.Controllers
                 existing.Priority = model.Priority;
                 existing.AssignedToUserId = model.AssignedToUserId;
                 existing.Status = model.Status;
+                existing.Purpose = model.Purpose;
+                existing.ReceiverName = model.ReceiverName;
+                existing.UnderProcessBy = model.UnderProcessBy;
+                existing.HandedTo = model.HandedTo;
+                existing.Other = model.Other;
+                existing.DepartureDate = model.DepartureDate;
+                existing.DateOfReturn = model.DateOfReturn;
 
                 _context.Update(existing);
                 await _context.SaveChangesAsync();
@@ -156,6 +169,33 @@ namespace ChairmanOMS.Controllers
             ViewBag.Statuses = new SelectList(new[] { "Received", "UnderReview", "Approved", "Rejected", "Archived" });
             ViewBag.Priorities = new SelectList(new[] { "Low", "Medium", "High" });
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var doc = await _context.IncomingDocuments
+                .Include(d => d.WorkflowActions)
+                .FirstOrDefaultAsync(d => d.Id == id);
+            if (doc == null) return NotFound();
+
+            // Remove related workflow actions first (FK constraint)
+            _context.WorkflowActions.RemoveRange(doc.WorkflowActions);
+
+            // Delete physical attachment if present
+            if (!string.IsNullOrEmpty(doc.AttachmentPath))
+            {
+                var filePath = Path.Combine(_env.WebRootPath, doc.AttachmentPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(filePath))
+                    System.IO.File.Delete(filePath);
+            }
+
+            _context.IncomingDocuments.Remove(doc);
+            await _context.SaveChangesAsync();
+            await LogActivity("Delete", $"Incoming document '{doc.ReferenceNumber}' deleted.");
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

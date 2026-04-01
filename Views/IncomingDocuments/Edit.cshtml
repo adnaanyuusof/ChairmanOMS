@@ -13,30 +13,103 @@
                 <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input type="hidden" asp-for="Id" />
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none"></div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="ReferenceNumber" class="form-label text-muted small fw-bold"></label>
                             <input asp-for="ReferenceNumber" class="form-control" required />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="SourceInstitution" class="form-label text-muted small fw-bold"></label>
-                            <input asp-for="SourceInstitution" class="form-control" required />
+                            <label asp-for="Purpose" class="form-label text-muted small fw-bold">FullName</label>
+                            <input asp-for="Purpose" class="form-control" placeholder="Enter full name" />
                         </div>
                     </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SourceInstitution" class="form-label text-muted small fw-bold"></label>
+                        <select asp-for="SourceInstitution" class="form-select" required>
+                            <option value="">-- Select Institution --</option>
+                            <option>Ministry of Presidency</option>
+                            <option>Civil Service Commission</option>
+                            <option>Ministry of Labour and Social Affairs</option>
+                            <option>Ministry of Livestock and Rural Development</option>
+                            <option>Ministry of Finance</option>
+                            <option>Ministry of Education</option>
+                            <option>Ministry of Health</option>
+                            <option>Ministry of Information, Orientation and Culture</option>
+                            <option>Ministry of Environment and Climate Change</option>
+                            <option>Ministry of Public Works, Housing & Land</option>
+                            <option>Ministry of Commerce, Industry and Tourism</option>
+                            <option>Ministry of Agriculture</option>
+                            <option>Ministry of Youth and Sports</option>
+                            <option>Ministry of National Planning and Development</option>
+                            <option>Ministry of Water Resources</option>
+                            <option>Ministry of Telecommunications & Technology</option>
+                            <option>Ministry of Justice</option>
+                            <option>Ministry of Transportation and Road Development</option>
+                            <option>Ministry of Energy and Minerals</option>
+                            <option>Ministry of Foreign Affairs</option>
+                            <option>Ministry of Religion & Endowment</option>
+                            <option>Ministry of Parliamentary Relations and Constitutional Affairs</option>
+                            <option>Ministry of Defense</option>
+                            <option>Ministry of Civil Aviation and Airports Development</option>
+                            <option>Ministry of Interior</option>
+                            <option>Ministry of Investment</option>
+                            <option>Ministry of Fisheries and Marine Resources</option>
+                            <option>Ministry of Local Governments and Urban Development</option>
+                            <option>Ministry of Resettlement and Humanitarian Affairs</option>
+                            <option>Somaliland Quality Control Committee</option>
+                            <option>Attorney General Office</option>
+                            <option>Somaliland National HIV/AIDS Commission</option>
+                            <option>National Environmental Research and Natural Disaster Preparedness Authority (NERAD)</option>
+                            <option>Political Parties Registrations Committee</option>
+                            <option>National Human Rights Committee</option>
+                            <option>National Law Reform Committee</option>
+                            <option>National Higher Studies Committee</option>
+                            <option>National Tender Board</option>
+                            <option>National Health Professional Commission</option>
+                            <option>Good Governance and Anti-corruption Commission</option>
+                            <option>National Insurance Authority</option>
+                            <option>National Insurance Authority - Somaliland</option>
+                            <option>Solicitor General Office</option>
+                            <option>Auditor General Office</option>
+                            <option>Civil Service Institute</option>
+                            <option>Civil Service Pension and Gratuity Commission</option>
+                            <option>Somaliland Road Development Authority</option>
+                            <option>Somaliland Warcrimes Investigation Commission</option>
+                            <option>Somaliland National Electoral Commission</option>
+                            <option>Somaliland Special Economic Zones Authority</option>
+                            <option>Somaliland Energy Commission</option>
+                            <option>Supreme Court and Lower Courts</option>
+                            <option>Maroodijeex Lower Court</option>
+                            <option>Hargeisa TB Hospital</option>
+                            <option>Hargeisa Group Hospital</option>
+                            <option>SPA</option>
+                            <option>BOT</option>
+                            <option>UN-ALLOCATED</option>
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label asp-for="Subject" class="form-label text-muted small fw-bold"></label>
                         <input asp-for="Subject" class="form-control" required />
                     </div>
+
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label asp-for="DateReceived" class="form-label text-muted small fw-bold"></label>
                             <input asp-for="DateReceived" type="date" class="form-control" required />
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label asp-for="Priority" class="form-label text-muted small fw-bold"></label>
                             <select asp-for="Priority" class="form-select" asp-items="@ViewBag.Priorities"></select>
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Status" class="form-label text-muted small fw-bold"></label>
+                            <select asp-for="Status" class="form-select" asp-items="@ViewBag.Statuses"></select>
+                        </div>
                     </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="AssignedToUserId" class="form-label text-muted small fw-bold">Assign To</label>
@@ -45,10 +118,86 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Status" class="form-label text-muted small fw-bold"></label>
-                            <select asp-for="Status" class="form-select" asp-items="@ViewBag.Statuses"></select>
+                            <label asp-for="ReceiverName" class="form-label text-muted small fw-bold">Receiver Name</label>
+                            <select asp-for="ReceiverName" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="Boostada">Boostada</option>
+                                <option value="masuulka">Masuulka</option>
+                                <option value="HR">HR</option>
+                                <option value="xoghayn">Xoghayn</option>
+                            </select>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UnderProcessBy" class="form-label text-muted small fw-bold">Under Process By</label>
+                            <select asp-for="UnderProcessBy" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="lafasaxay">Lafasaxay</option>
+                                <option value="lahakiyay">Lahakiyay</option>
+                                <option value="lasaxeeyay">Lasaxeeyay</option>
+                                <option value="lataala">Lataala</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HandedTo" class="form-label text-muted small fw-bold">Handed To</label>
+                            <select asp-for="HandedTo" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="Amiin">Amiin</option>
+                                <option value="Hodan">Hodan</option>
+                                <option value="xasan">Xasan</option>
+                                <option value="abdirahman">Abdirahman</option>
+                                <option value="abdirisaaq">Abdirisaaq</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Other" class="form-label text-muted small fw-bold">Other / Dept</label>
+                        <select asp-for="Other" class="form-select">
+                            <option value="">-- Select Department --</option>
+                            <option value="ICT Department">ICT Department</option>
+                            <option value="Planning and Policy">Planning and Policy</option>
+                            <option value="Admin And Finance">Admin And Finance</option>
+                            <option value="Legal Affairs">Legal Affairs</option>
+                            <option value="Recruitment">Recruitment</option>
+                            <option value="Performance and Appraisal">Performance and Appraisal</option>
+                            <option value="Payroll">Payroll</option>
+                            <option value="Regional Coordination Office">Regional Coordination Office</option>
+                            <option value="Internal Audit Office">Internal Audit Office</option>
+                            <option value="Public Relation and Communication Office">Public Relation and Communication Office</option>
+                            <option value="National Archives and Record Management Office">National Archives and Record Management Office</option>
+                            <option value="Healthy and Safety Office">Healthy and Safety Office</option>
+                            <option value="Awdal Regional Office">Awdal Regional Office</option>
+                            <option value="Saaxil Regional Office">Saaxil Regional Office</option>
+                            <option value="Training and Skill Development">Training and Skill Development</option>
+                            <option value="Togdheer Regional Office">Togdheer Regional Office</option>
+                            <option value="Sanaag Regional Office">Sanaag Regional Office</option>
+                            <option value="Sool Regional Office">Sool Regional Office</option>
+                            <option value="Gabiley Regional Office">Gabiley Regional Office</option>
+                            <option value="Saraar Regional Office">Saraar Regional Office</option>
+                            <option value="Hawd Regional Office">Hawd Regional Office</option>
+                            <option value="Daad-Madheedh Regional">Daad-Madheedh Regional</option>
+                            <option value="OD Department">OD Department</option>
+                            <option value="Human resource Management">Human Resource Management</option>
+                            <option value="WAAXDA KOR-JOOGTAYNTA IYO KORMEERKA SHAQAALAHA">WAAXDA KOR-JOOGTAYNTA IYO KORMEERKA SHAQAALAHA</option>
+                            <option value="dhimashada">Dhimashada</option>
+                            <option value="Anshax marinta">Anshax Marinta</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DepartureDate" class="form-label text-muted small fw-bold">Departure Date</label>
+                            <input asp-for="DepartureDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DateOfReturn" class="form-label text-muted small fw-bold">Date of Return</label>
+                            <input asp-for="DateOfReturn" type="date" class="form-control" />
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label class="form-label text-muted small fw-bold">Update Attachment (Optional)</label>
                         <input type="file" name="attachment" class="form-control" accept=".pdf,.docx,.doc" />
@@ -57,6 +206,7 @@
                             <small class="text-muted d-block mt-1">Current: <a href="@Model.AttachmentPath" target="_blank">View File</a></small>
                         }
                     </div>
+
                     <div class="d-flex justify-content-end gap-2">
                         <a asp-action="Index" class="btn btn-light">Cancel</a>
                         <button type="submit" class="btn btn-primary">Save Changes</button>

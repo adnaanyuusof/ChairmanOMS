@@ -27,6 +27,22 @@
                     <dt class="col-sm-4 text-muted">Date Sent</dt>
                     <dd class="col-sm-8">@Model.DateSent.ToLongDateString()</dd>
 
+                    @if (!string.IsNullOrEmpty(Model.ConveyerName))
+                    {
+                        <dt class="col-sm-4 text-muted">Conveyer Name</dt>
+                        <dd class="col-sm-8">@Model.ConveyerName</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                    {
+                        <dt class="col-sm-4 text-muted">Phone Number</dt>
+                        <dd class="col-sm-8">@Model.PhoneNumber</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ReceiverName))
+                    {
+                        <dt class="col-sm-4 text-muted">Receiver Name</dt>
+                        <dd class="col-sm-8">@Model.ReceiverName</dd>
+                    }
+
                     @if (Model.LinkedIncomingDocument != null)
                     {
                         <dt class="col-sm-4 text-muted">In Response To</dt>

@@ -13,6 +13,10 @@ namespace ChairmanOMS.Models
         public string? SignaturePath { get; set; }
         public string Status { get; set; } = "Draft"; // Draft, Approved, Sent, Delivered
         
+        public string? ConveyerName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? ReceiverName { get; set; }
+        
         public int? LinkedIncomingDocumentId { get; set; }
         public IncomingDocument? LinkedIncomingDocument { get; set; }
         

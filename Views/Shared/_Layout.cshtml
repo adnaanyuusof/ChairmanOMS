@@ -261,6 +261,16 @@
                         <span>Tasks</span>
                     </a>
                 </div>
+                @if (!User.IsInRole("Staff"))
+                {
+                    <div class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Appointments" ? "active" : "")" 
+                           asp-controller="Appointments" asp-action="Index">
+                            <i class="bi bi-calendar-event-fill"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </div>
+                }
 
                 @if (User.IsInRole("Admin"))
                 {

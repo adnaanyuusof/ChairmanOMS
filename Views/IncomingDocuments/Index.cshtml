@@ -18,7 +18,7 @@
     <div class="card-body py-3">
         <form method="get" class="row g-2 align-items-end">
             <div class="col-md-5">
-                <input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by subject, source or ref#…" />
+                <input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name, subject, source or ref#…" />
             </div>
             <div class="col-md-2">
                 <select name="status" class="form-select" asp-items="@ViewBag.Statuses">
@@ -38,17 +38,25 @@
     </div>
 </div>
 
+
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <table class="table table-hover mb-0 align-middle">
+        <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle small">
             <thead class="table-light">
                 <tr>
                     <th class="ps-3">Ref #</th>
+                    <th>FullName</th>
                     <th>Source</th>
                     <th>Subject</th>
+                    <th>Receiver</th>
+                    <th>Under Process By</th>
+                    <th>Handed To</th>
+                    <th>Other / Dept</th>
                     <th>Date Received</th>
+                    <th>Departure</th>
+                    <th>Return</th>
                     <th>Priority</th>
-                    <th>Assigned To</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -60,26 +68,49 @@
                     var sClass = doc.Status == "Approved" ? "bg-success" : doc.Status == "Rejected" ? "bg-danger" : doc.Status == "Archived" ? "bg-dark" : doc.Status == "UnderReview" ? "bg-info text-dark" : "bg-primary";
                     <tr>
                         <td class="ps-3"><code>@doc.ReferenceNumber</code></td>
+                        <td>@(string.IsNullOrEmpty(doc.Purpose) ? "—" : doc.Purpose)</td>
                         <td>@doc.SourceInstitution</td>
                         <td><a asp-action="Details" asp-route-id="@doc.Id" class="text-decoration-none fw-medium">@doc.Subject</a></td>
+                        <td>@(string.IsNullOrEmpty(doc.ReceiverName) ? "—" : doc.ReceiverName)</td>
+                        <td>@(string.IsNullOrEmpty(doc.UnderProcessBy) ? "—" : doc.UnderProcessBy)</td>
+                        <td>@(string.IsNullOrEmpty(doc.HandedTo) ? "—" : doc.HandedTo)</td>
+                        <td>@(string.IsNullOrEmpty(doc.Other) ? "—" : doc.Other)</td>
                         <td>@doc.DateReceived.ToShortDateString()</td>
+                        <td>@(doc.DepartureDate.HasValue ? doc.DepartureDate.Value.ToShortDateString() : "—")</td>
+                        <td>@(doc.DateOfReturn.HasValue ? doc.DateOfReturn.Value.ToShortDateString() : "—")</td>
                         <td><span class="badge @pClass">@doc.Priority</span></td>
-                        <td><small>@(doc.AssignedToUser?.Email ?? "Unassigned")</small></td>
                         <td><span class="badge @sClass">@doc.Status</span></td>
                         <td>
-                            <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary">View</a>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Secretary") || User.IsInRole("Records Officer"))
-                            {
-                                <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
-                            }
+                            <div class="d-flex gap-1 flex-nowrap">
+                                <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Secretary") || User.IsInRole("Records Officer"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form asp-action="Delete" asp-route-id="@doc.Id" method="post"
+                                          onsubmit="return confirm('Delete document @doc.ReferenceNumber? This cannot be undone.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                }
+                            </div>
                         </td>
                     </tr>
                 }
                 @if (!Model.Any())
                 {
-                    <tr><td colspan="8" class="text-center text-muted py-4">No documents found.</td></tr>
+                    <tr><td colspan="14" class="text-center text-muted py-4">No documents found.</td></tr>
                 }
             </tbody>
         </table>
+        </div>
     </div>
 </div>
+

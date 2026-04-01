@@ -286,6 +286,7 @@
                     <thead>
                         <tr>
                             <th>Ref #</th>
+                            <th>FullName</th>
                             <th>Source</th>
                             <th>Subject</th>
                             <th>Priority</th>
@@ -297,6 +298,7 @@
                         {
                             <tr>
                                 <td><span class="ref-badge">@doc.ReferenceNumber</span></td>
+                                <td>@(string.IsNullOrEmpty(doc.Purpose) ? "—" : doc.Purpose)</td>
                                 <td class="fw-medium">@doc.SourceInstitution</td>
                                 <td>
                                     <a asp-controller="IncomingDocuments" asp-action="Details" asp-route-id="@doc.Id" class="text-decoration-none text-dark">

@@ -131,6 +131,9 @@ namespace ChairmanOMS.Controllers
                 existing.DateSent = model.DateSent;
                 existing.Status = model.Status;
                 existing.LinkedIncomingDocumentId = model.LinkedIncomingDocumentId;
+                existing.ConveyerName = model.ConveyerName;
+                existing.PhoneNumber = model.PhoneNumber;
+                existing.ReceiverName = model.ReceiverName;
 
                 _context.Update(existing);
                 await _context.SaveChangesAsync();
@@ -141,6 +144,33 @@ namespace ChairmanOMS.Controllers
             ViewBag.Statuses = new SelectList(new[] { "Draft", "Approved", "Sent", "Delivered" });
             ViewBag.IncomingDocs = new SelectList(await _context.IncomingDocuments.ToListAsync(), "Id", "Subject");
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var doc = await _context.OutgoingDocuments
+                .Include(d => d.WorkflowActions)
+                .FirstOrDefaultAsync(d => d.Id == id);
+            if (doc == null) return NotFound();
+
+            // Remove related workflow actions first (FK constraint)
+            _context.WorkflowActions.RemoveRange(doc.WorkflowActions);
+
+            // Delete physical attachment if present
+            if (!string.IsNullOrEmpty(doc.AttachmentPath))
+            {
+                var filePath = Path.Combine(_env.WebRootPath, doc.AttachmentPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(filePath))
+                    System.IO.File.Delete(filePath);
+            }
+
+            _context.OutgoingDocuments.Remove(doc);
+            await _context.SaveChangesAsync();
+            await LogActivity("Delete", $"Outgoing document '{doc.ReferenceNumber}' deleted.");
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

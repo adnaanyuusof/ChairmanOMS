@@ -36,6 +36,48 @@
                     <dt class="col-sm-4 text-muted">Assigned To</dt>
                     <dd class="col-sm-8">@(Model.AssignedToUser?.Email ?? "Unassigned")</dd>
 
+                    @if (!string.IsNullOrEmpty(Model.Purpose))
+                    {
+                        <dt class="col-sm-4 text-muted">FullName</dt>
+                        <dd class="col-sm-8">@Model.Purpose</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.ReceiverName))
+                    {
+                        <dt class="col-sm-4 text-muted">Receiver Name</dt>
+                        <dd class="col-sm-8">@Model.ReceiverName</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.UnderProcessBy))
+                    {
+                        <dt class="col-sm-4 text-muted">Under Process By</dt>
+                        <dd class="col-sm-8">@Model.UnderProcessBy</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.HandedTo))
+                    {
+                        <dt class="col-sm-4 text-muted">Handed To</dt>
+                        <dd class="col-sm-8">@Model.HandedTo</dd>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Other))
+                    {
+                        <dt class="col-sm-4 text-muted">Other</dt>
+                        <dd class="col-sm-8">@Model.Other</dd>
+                    }
+
+                    @if (Model.DepartureDate.HasValue)
+                    {
+                        <dt class="col-sm-4 text-muted">Departure Date</dt>
+                        <dd class="col-sm-8">@Model.DepartureDate.Value.ToLongDateString()</dd>
+                    }
+
+                    @if (Model.DateOfReturn.HasValue)
+                    {
+                        <dt class="col-sm-4 text-muted">Date of Return</dt>
+                        <dd class="col-sm-8">@Model.DateOfReturn.Value.ToLongDateString()</dd>
+                    }
+
                     @if (!string.IsNullOrEmpty(Model.AttachmentPath))
                     {
                         <dt class="col-sm-4 text-muted">Attachment</dt>
@@ -115,6 +157,15 @@
         <div class="d-grid gap-2">
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit Document</a>
             <a asp-action="Index" class="btn btn-light">Back to List</a>
+            @if (User.IsInRole("Admin"))
+            {
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('Are you sure you want to permanently delete this document?');">
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="bi bi-trash me-1"></i>Delete Document
+                    </button>
+                </form>
+            }
         </div>
     </div>
 </div>
