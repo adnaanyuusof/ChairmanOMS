@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ChairmanOMS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+10aa2a46dabf220718680c3064f2037035334dfa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ccc129b21dea11c2cd34a168aadb39136298d5c")]
 [assembly: System.Reflection.AssemblyProductAttribute("ChairmanOMS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ChairmanOMS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -12,8 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5151";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// Database configuration: Use PostgreSQL on Render, SQL Server locally
+// Database configuration: Use PostgreSQL on Render, or detect provider locally
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
@@ -26,11 +28,15 @@ if (!string.IsNullOrEmpty(databaseUrl))
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(npgsqlConn));
 }
+else if (connectionString.Contains("Host="))
+{
+    // Use PostgreSQL locally if connected to Render's external URL
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
 else
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
+    // Use SQL Server locally
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString));
 }
