@@ -78,15 +78,8 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         
-        // If using PostgreSQL (Render), use EnsureCreated to bypass SQL Server migrations
-        if (context.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL") 
-        {
-            context.Database.EnsureCreated();
-        } 
-        else 
-        {
-            context.Database.Migrate(); 
-        }
+        // Auto-apply migrations for all providers
+        context.Database.Migrate(); 
 
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
