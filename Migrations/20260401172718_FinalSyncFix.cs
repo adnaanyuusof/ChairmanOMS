@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChairmanOMS.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPostgresSync : Migration
+    public partial class FinalSyncFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

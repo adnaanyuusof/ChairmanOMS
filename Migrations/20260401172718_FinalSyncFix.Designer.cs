@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChairmanOMS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260401165620_InitialPostgresSync")]
-    partial class InitialPostgresSync
+    [Migration("20260401172718_FinalSyncFix")]
+    partial class FinalSyncFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
