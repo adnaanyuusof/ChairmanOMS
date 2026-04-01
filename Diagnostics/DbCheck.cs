@@ -26,28 +26,18 @@ namespace ChairmanOMS.Diagnostics
                 var conn = db.Database.GetDbConnection();
                 conn.Open();
 
-                Console.WriteLine("Checking columns for OutgoingDocuments...");
-                using (var cmd = conn.CreateCommand())
+                foreach(var table in new[] { "IncomingDocuments", "OutgoingDocuments", "Appointments" })
                 {
-                    cmd.CommandText = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'OutgoingDocuments' ORDER BY ordinal_position;";
-                    using (var reader = cmd.ExecuteReader())
+                    Console.WriteLine($"\n--- Columns for [{table}] ---");
+                    using (var cmd = conn.CreateCommand())
                     {
-                        while (reader.Read())
+                        cmd.CommandText = $"SELECT '\"' || column_name || '\"' FROM information_schema.columns WHERE table_name = '{table}';";
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            Console.WriteLine($"- {reader.GetString(0)} ({reader.GetString(1)})");
-                        }
-                    }
-                }
-
-                Console.WriteLine("\nChecking __EFMigrationsHistory...");
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT \"MigrationId\" FROM \"__EFMigrationsHistory\" ORDER BY \"MigrationId\";";
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Console.WriteLine($"- {reader.GetString(0)}");
+                            while (reader.Read())
+                            {
+                                Console.WriteLine(reader.GetString(0));
+                            }
                         }
                     }
                 }

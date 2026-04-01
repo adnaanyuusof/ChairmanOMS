@@ -24,6 +24,26 @@ namespace ChairmanOMS.Data
         {
             base.OnModelCreating(builder);
 
+            // Force naming to match exactly what's in the DB to avoid Case-Sensitivity issues
+            builder.Entity<IncomingDocument>().ToTable("IncomingDocuments");
+            builder.Entity<OutgoingDocument>().ToTable("OutgoingDocuments");
+            builder.Entity<Appointment>().ToTable("Appointments");
+            builder.Entity<TaskItem>().ToTable("TaskItems");
+
+            // Explicit column mapping for OutgoingDocuments (Fixes PostgresException: 42703)
+            builder.Entity<OutgoingDocument>().Property(d => d.ConveyerName).HasColumnName("ConveyerName");
+            builder.Entity<OutgoingDocument>().Property(d => d.PhoneNumber).HasColumnName("PhoneNumber");
+            builder.Entity<OutgoingDocument>().Property(d => d.ReceiverName).HasColumnName("ReceiverName");
+            builder.Entity<OutgoingDocument>().Property(d => d.LinkedIncomingDocumentId).HasColumnName("LinkedIncomingDocumentId");
+            builder.Entity<OutgoingDocument>().Property(d => d.CreatedAt).HasColumnName("CreatedAt");
+
+            // Explicit column mapping for Appointments
+            builder.Entity<Appointment>().Property(a => a.Masuulka).HasColumnName("Masuulka");
+            builder.Entity<Appointment>().Property(a => a.VisitorStatus).HasColumnName("VisitorStatus");
+            builder.Entity<Appointment>().Property(a => a.CheckInTime).HasColumnName("CheckInTime");
+            builder.Entity<Appointment>().Property(a => a.CheckOutTime).HasColumnName("CheckOutTime");
+            builder.Entity<Appointment>().Property(a => a.CreatedById).HasColumnName("CreatedById");
+
             builder.Entity<TaskItem>()
                 .HasOne(t => t.CreatedBy)
                 .WithMany()

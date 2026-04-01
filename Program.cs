@@ -8,6 +8,13 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Diagnostic Check
+if (args.Length > 0 && args[0] == "db-check")
+{
+    ChairmanOMS.Diagnostics.DbCheck.Run(args);
+    return;
+}
+
 // Bind to PORT env var for Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5151";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
@@ -19,6 +26,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
+    Console.WriteLine($"[DB] Using DATABASE_URL: {databaseUrl.Split('@')[1]}");
     // Parse Render's DATABASE_URL (postgres://user:pass@host:port/dbname)
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
@@ -30,12 +38,14 @@ if (!string.IsNullOrEmpty(databaseUrl))
 }
 else if (connectionString.Contains("Host="))
 {
+    Console.WriteLine("[DB] Using PostgreSQL (External) from appsettings.json");
     // Use PostgreSQL locally if connected to Render's external URL
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(connectionString));
 }
 else
 {
+    Console.WriteLine("[DB] Using SQL Server");
     // Use SQL Server locally
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString));
@@ -90,6 +100,7 @@ using (var scope = app.Services.CreateScope())
         using (var cmd = connection.CreateCommand())
         {
             cmd.CommandText = @"
+                -- IncomingDocuments
                 ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""Purpose"" text;
                 ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""ReceiverName"" text;
                 ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""UnderProcessBy"" text;
@@ -98,11 +109,13 @@ using (var scope = app.Services.CreateScope())
                 ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""DepartureDate"" timestamp without time zone;
                 ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""DateOfReturn"" timestamp without time zone;
 
+                -- OutgoingDocuments
                 ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""ConveyerName"" text;
                 ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""PhoneNumber"" text;
                 ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""ReceiverName"" text;
                 ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""LinkedIncomingDocumentId"" integer;
 
+                -- Appointments
                 ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""Masuulka"" text;
                 ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""VisitorStatus"" text;
                 ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CheckInTime"" timestamp without time zone;
