@@ -8,25 +8,15 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Diagnostic Check
-if (args.Length > 0 && args[0] == "db-check")
-{
-    ChairmanOMS.Diagnostics.DbCheck.Run(args);
-    return;
-}
-
 // Bind to PORT env var for Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5151";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// Database configuration: Use PostgreSQL on Render, or detect provider locally
+// Database configuration: Use PostgreSQL on Render, SQL Server locally
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    Console.WriteLine($"[DB] Using DATABASE_URL: {databaseUrl.Split('@')[1]}");
     // Parse Render's DATABASE_URL (postgres://user:pass@host:port/dbname)
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
@@ -36,17 +26,11 @@ if (!string.IsNullOrEmpty(databaseUrl))
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(npgsqlConn));
 }
-else if (connectionString.Contains("Host="))
-{
-    Console.WriteLine("[DB] Using PostgreSQL (External) from appsettings.json");
-    // Use PostgreSQL locally if connected to Render's external URL
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
-}
 else
 {
-    Console.WriteLine("[DB] Using SQL Server");
-    // Use SQL Server locally
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString));
 }
@@ -94,39 +78,15 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         
-        // Raw SQL for missing columns to be 100% sure - Run BEFORE Migrate
-        var connection = context.Database.GetDbConnection();
-        connection.Open();
-        using (var cmd = connection.CreateCommand())
+        // If using PostgreSQL (Render), use EnsureCreated to bypass SQL Server migrations
+        if (context.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL") 
         {
-            cmd.CommandText = @"
-                -- IncomingDocuments
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""Purpose"" text;
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""ReceiverName"" text;
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""UnderProcessBy"" text;
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""HandedTo"" text;
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""Other"" text;
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""DepartureDate"" timestamp without time zone;
-                ALTER TABLE ""IncomingDocuments"" ADD COLUMN IF NOT EXISTS ""DateOfReturn"" timestamp without time zone;
-
-                -- OutgoingDocuments
-                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""ConveyerName"" text;
-                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""PhoneNumber"" text;
-                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""ReceiverName"" text;
-                ALTER TABLE ""OutgoingDocuments"" ADD COLUMN IF NOT EXISTS ""LinkedIncomingDocumentId"" integer;
-
-                -- Appointments
-                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""Masuulka"" text;
-                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""VisitorStatus"" text;
-                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CheckInTime"" timestamp without time zone;
-                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CheckOutTime"" timestamp without time zone;
-                ALTER TABLE ""Appointments"" ADD COLUMN IF NOT EXISTS ""CreatedById"" text;
-            ";
-            cmd.ExecuteNonQuery();
+            context.Database.EnsureCreated();
+        } 
+        else 
+        {
+            context.Database.Migrate(); 
         }
-
-        // Auto-apply migrations
-        context.Database.Migrate(); 
 
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();

@@ -220,6 +220,33 @@ namespace ChairmanOMS.Controllers
                            : actionTaken == "Rejected" ? "Rejected"
                            : "UnderReview";
                 _context.Update(doc);
+
+                // Auto-register in Approved Documents if status is Approved
+                if (actionTaken == "Approved")
+                {
+                    var approvedDoc = new ApprovedDocument
+                    {
+                        ReferenceNumber = doc.ReferenceNumber,
+                        Title = doc.Subject,
+                        DocumentType = "Incoming",
+                        SourceOrDestination = doc.SourceInstitution,
+                        Description = doc.Purpose ?? doc.Subject,
+                        ApprovedDate = DateTime.UtcNow,
+                        ApprovedByUserId = user.Id,
+                        RelatedDocumentId = doc.Id,
+                        FilePath = doc.AttachmentPath,
+                        Status = "Approved",
+                        Remarks = notes,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedById = user.Id
+                    };
+                    
+                    // Check if already exists to avoid duplicates
+                    if (!await _context.ApprovedDocuments.AnyAsync(a => a.ReferenceNumber == doc.ReferenceNumber))
+                    {
+                        _context.ApprovedDocuments.Add(approvedDoc);
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();

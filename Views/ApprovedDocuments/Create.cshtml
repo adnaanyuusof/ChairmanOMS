@@ -1,0 +1,99 @@
+@model ChairmanOMS.Models.ApprovedDocument
+
+@{
+    ViewData["Title"] = "Register Approved Document";
+}
+
+<div class="container-fluid px-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-plus-circle text-primary me-2"></i>Register Approved Document</h1>
+        <p class="text-muted small">Manually add an approved document to the central registry.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-10 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Document Metadata</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="ReferenceNumber" class="form-label fw-bold small text-uppercase text-muted"></label>
+                                <input asp-for="ReferenceNumber" class="form-control" placeholder="CSC/OMS/2026/001" />
+                                <span asp-validation-for="ReferenceNumber" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DocumentType" class="form-label fw-bold small text-uppercase text-muted"></label>
+                                <select asp-for="DocumentType" class="form-select">
+                                    <option value="Incoming">Incoming</option>
+                                    <option value="Outgoing">Outgoing</option>
+                                </select>
+                                <span asp-validation-for="DocumentType" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label fw-bold small text-uppercase text-muted">Subject / Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter document title or brief subject" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="SourceOrDestination" class="form-label fw-bold small text-uppercase text-muted">Ministry / Institution</label>
+                                <input asp-for="SourceOrDestination" class="form-control" placeholder="Source or Destination name" />
+                                <span asp-validation-for="SourceOrDestination" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ApprovedDate" class="form-label fw-bold small text-uppercase text-muted"></label>
+                                <input asp-for="ApprovedDate" type="date" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="ApprovedDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold small text-uppercase text-muted"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Brief summary of document content..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label fw-bold small text-uppercase text-muted"></label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="Approved">Approved / Finalized</option>
+                                    <option value="Archived">Archived</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="FilePath" class="form-label fw-bold small text-uppercase text-muted">Attachment Link (Optional)</label>
+                                <input asp-for="FilePath" class="form-control" placeholder="e.g. /uploads/docs/signed_ref123.pdf" />
+                                <span asp-validation-for="FilePath" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Remarks" class="form-label fw-bold small text-uppercase text-muted"></label>
+                            <textarea asp-for="Remarks" class="form-control" rows="2" placeholder="Any additional notes or internal remarks..."></textarea>
+                            <span asp-validation-for="Remarks" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5 shadow-sm">Save to Registry</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

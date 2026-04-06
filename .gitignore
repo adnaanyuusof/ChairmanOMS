@@ -1,0 +1,16 @@
+# .NET GitIgnore
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.log
+appsettings.Development.json
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep

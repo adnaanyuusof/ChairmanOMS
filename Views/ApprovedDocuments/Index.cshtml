@@ -1,0 +1,156 @@
+@model IEnumerable<ChairmanOMS.Models.ApprovedDocument>
+
+@{
+    ViewData["Title"] = "Approved Documents Registry";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-file-check text-primary me-2"></i>Approved Documents Registry</h1>
+            <p class="text-muted small mb-0">Central repository for all officially finalized documents.</p>
+        </div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Chairman"))
+        {
+            <a asp-action="Create" class="btn btn-primary shadow-sm hover-elevate">
+                <i class="fas fa-plus me-1"></i> Register New Approved Document
+            </a>
+        }
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card border-0 shadow-sm mb-4 bg-light overflow-hidden">
+        <div class="card-body p-4">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="searchString" class="form-label small fw-bold text-uppercase text-muted">Search Registry</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted small"></i></span>
+                        <input type="text" name="searchString" class="form-control border-start-0" placeholder="Ref # or Title..." value="@ViewContext.HttpContext.Request.Query["searchString"]" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label for="docType" class="form-label small fw-bold text-uppercase text-muted">Type</label>
+                    <select name="docType" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Types</option>
+                        <option value="Incoming" selected="@(ViewContext.HttpContext.Request.Query["docType"] == "Incoming")">Incoming</option>
+                        <option value="Outgoing" selected="@(ViewContext.HttpContext.Request.Query["docType"] == "Outgoing")">Outgoing</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="startDate" class="form-label small fw-bold text-uppercase text-muted">From Date</label>
+                    <input type="date" name="startDate" class="form-control" value="@ViewContext.HttpContext.Request.Query["startDate"]" />
+                </div>
+                <div class="col-md-2">
+                    <label for="endDate" class="form-label small fw-bold text-uppercase text-muted">To Date</label>
+                    <input type="date" name="endDate" class="form-control" value="@ViewContext.HttpContext.Request.Query["endDate"]" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark px-4 me-2">Apply Filters</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registry Table -->
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 stylish-table">
+                <thead class="bg-dark text-white opacity-90 border-0">
+                    <tr>
+                        <th class="ps-4 py-3">Reference #</th>
+                        <th class="py-3">Title / Subject</th>
+                        <th class="py-3">Type</th>
+                        <th class="py-3">Approved Date</th>
+                        <th class="py-3 text-center">Status</th>
+                        <th class="pe-4 py-3 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted fst-italic">
+                                <div class="mb-3"><i class="fad fa-cabinet-filing fa-3x opacity-25"></i></div>
+                                No matching approved documents found.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold text-primary">@item.ReferenceNumber</td>
+                            <td>
+                                <div class="fw-bold text-gray-800">@item.Title</div>
+                                <div class="small text-muted">@item.SourceOrDestination</div>
+                            </td>
+                            <td>
+                                <span class="badge @(item.DocumentType == "Incoming" ? "bg-info-soft" : "bg-warning-soft") px-2 py-1 rounded-pill">
+                                    <i class="fas @(item.DocumentType == "Incoming" ? "fa-arrow-down" : "fa-arrow-up") me-1 small"></i>
+                                    @item.DocumentType
+                                </span>
+                            </td>
+                            <td>@item.ApprovedDate.ToString("MMM dd, yyyy")</td>
+                            <td class="text-center">
+                                @if (item.Status == "Approved")
+                                {
+                                    <span class="badge bg-success-soft text-success px-2 py-1 rounded-pill fw-normal shadow-sm pulse-green">
+                                        <i class="fas fa-check-circle me-1"></i>Approved
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-soft text-secondary px-2 py-1 rounded-pill fw-normal">
+                                        <i class="fas fa-archive me-1"></i>@item.Status
+                                    </span>
+                                }
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="btn-group shadow-sm border rounded">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light btn-sm px-3 border-end" title="View Details">
+                                        <i class="fas fa-eye text-primary"></i>
+                                    </a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Chairman"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light btn-sm px-3 border-end" title="Edit Record">
+                                            <i class="fas fa-edit text-warning"></i>
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.FilePath))
+                                    {
+                                        <a href="@item.FilePath" target="_blank" class="btn btn-light btn-sm px-3" title="View Attachment">
+                                            <i class="fas fa-paperclip text-info"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-info-soft { background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0; }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+    .bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); color: #6c7525; }
+    
+    .stylish-table tbody tr { border-bottom: 1px solid rgba(0,0,0,.05); transition: all .2s; }
+    .stylish-table tbody tr:hover { background-color: rgba(0, 123, 255, .02); transform: scale(1.002); }
+    
+    .hover-elevate:hover { transform: translateY(-2px); transition: all .3s ease; }
+    
+    .pulse-green {
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4);
+        animation: pulse-green 2s infinite;
+    }
+    @@keyframes pulse-green {
+        0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+    }
+</style>

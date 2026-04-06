@@ -1,0 +1,188 @@
+@model ChairmanOMS.Models.ApprovedDocument
+
+@{
+    ViewData["Title"] = "Approved Document Details";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-file-invoice text-primary me-2"></i>Approved Document Details</h1>
+            <p class="text-muted small">Comprehensive view of a finalized registry record.</p>
+        </div>
+        <div>
+            @if (User.IsInRole("Admin") || User.IsInRole("Chairman"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm me-2 shadow-sm">
+                    <i class="fas fa-edit me-1"></i> Edit Metadata
+                </a>
+            }
+            <a asp-action="Index" class="btn btn-dark btn-sm shadow-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back to Registry
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Metadata Information</h6>
+                    <span class="badge @(Model.DocumentType == "Incoming" ? "bg-info-soft" : "bg-warning-soft") rounded-pill">
+                        @Model.DocumentType Document
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6 border-end">
+                            <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Reference Number</label>
+                            <h4 class="text-primary fw-bold font-monospace">@Model.ReferenceNumber</h4>
+                        </div>
+                        <div class="col-md-6 ps-md-4">
+                            <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Approved Date</label>
+                            <h4 class="text-dark fw-bold">@Model.ApprovedDate.ToString("MMMM dd, yyyy")</h4>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 bg-light p-3 rounded-3 border-start border-4 border-primary">
+                        <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Document Title / Subject</label>
+                        <h5 class="text-dark mb-0 fw-bold">@Model.Title</h5>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Ministry / Institution</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-building text-muted me-2 opacity-50"></i>
+                                <span class="fw-bold">@Model.SourceOrDestination</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Current Status</label>
+                            @if (Model.Status == "Approved")
+                            {
+                                <span class="badge bg-success-soft text-success px-3 py-1 rounded-pill">
+                                    <i class="fas fa-check-circle me-1"></i>@Model.Status
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-soft text-secondary px-3 py-1 rounded-pill">
+                                    <i class="fas fa-archive me-1"></i>@Model.Status
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Summary / Description</label>
+                        <div class="p-3 bg-white border rounded shadow-sm-inset text-dark">
+                            @if (string.IsNullOrEmpty(Model.Description))
+                            {
+                                <span class="text-muted fst-italic fsmall">No description provided for this record.</span>
+                            }
+                            else
+                            {
+                                <p class="mb-0 lh-lg">@Model.Description</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-1">Internal Remarks</label>
+                        <div class="p-3 bg-opacity-10 bg-warning border-start border-4 border-warning rounded fst-italic">
+                            @if (string.IsNullOrEmpty(Model.Remarks))
+                            {
+                                <span class="text-muted small">No internal remarks available.</span>
+                            }
+                            else
+                            {
+                                <span class="text-dark fsmall"><i class="fas fa-comment me-2 opacity-50 fsmall"></i>@Model.Remarks</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Sidebar Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-bottom fst-italic">
+                    <h6 class="m-0 font-weight-bold text-gray-800 fsmall"><i class="fas fa-paperclip me-2 opacity-50 fsmall"></i>Finalized Attachment</h6>
+                </div>
+                <div class="card-body py-4 text-center">
+                    @if (!string.IsNullOrEmpty(Model.FilePath))
+                    {
+                        <div class="mb-3 px-3 py-4 bg-light rounded-pill d-inline-block hover-elevate shadow-sm">
+                            <i class="fas fa-file-pdf fa-4x text-danger opacity-75"></i>
+                        </div>
+                        <h6 class="text-dark fw-bold mb-3">Official Signed Copy</h6>
+                        <a href="@Model.FilePath" target="_blank" class="btn btn-outline-danger btn-block rounded-pill">
+                            <i class="fas fa-download me-2"></i>Download Document
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="mb-3 px-3 py-4 bg-light rounded-pill d-inline-block opacity-25">
+                            <i class="fas fa-file-alt fa-4x text-muted border-dashed p-3 rounded"></i>
+                        </div>
+                        <p class="text-muted small mb-0">No attachment linked to this registry record.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Audit Info -->
+            <div class="card border-0 shadow-sm mb-4 backdrop-blur bg-dark text-white opacity-90 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <i class="fas fa-user-shield position-absolute top-50 end-0 mt-3 me-3 fa-5x opacity-10"></i>
+                    <h6 class="text-uppercase small font-weight-bold letter-spacing-1 mb-3 opacity-50"><i class="fas fa-history me-1"></i>Registry Audit Log</h6>
+                    <div class="small mb-3">
+                        <label class="opacity-50 fsmall">Created On:</label>
+                        <div class="fw-bold">@Model.CreatedAt.ToString("MMMM dd, yyyy HH:mm")</div>
+                    </div>
+                    <div class="small mb-0">
+                        <label class="opacity-50 fsmall fst-italic">Registered By:</label>
+                        <div class="fw-bold">System Administrator (Auto)</div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.RelatedDocumentId.HasValue)
+            {
+                <div class="card border-0 shadow-sm border-start border-4 border-info">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info bg-opacity-10 p-2 rounded me-3 shadow-sm-inset">
+                                <i class="fas fa-link text-info"></i>
+                            </div>
+                            <div>
+                                <label class="text-muted small text-uppercase font-weight-bold letter-spacing-1 d-block mb-0 fsmall">Parent Document</label>
+                                @if (Model.DocumentType == "Incoming")
+                                {
+                                    <a asp-controller="IncomingDocuments" asp-action="Details" asp-route-id="@Model.RelatedDocumentId" class="text-info fw-bold small text-decoration-none hover-underline">View Original Record <i class="fas fa-arrow-right fsmall ms-1"></i></a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="OutgoingDocuments" asp-action="Details" asp-route-id="@Model.RelatedDocumentId" class="text-info fw-bold small text-decoration-none hover-underline">View Original Record <i class="fas fa-arrow-right fsmall ms-1"></i></a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-info-soft { background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0; }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); color: #198754; }
+    .bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); color: #6c7525; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .fsmall { font-size: 0.8rem; }
+    .shadow-sm-inset { box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+    .backdrop-blur { backdrop-filter: blur(5px); }
+    .hover-elevate:hover { transform: translateY(-3px); transition: all 0.3s; }
+</style>

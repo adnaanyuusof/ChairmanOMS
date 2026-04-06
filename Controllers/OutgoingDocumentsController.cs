@@ -195,6 +195,33 @@ namespace ChairmanOMS.Controllers
                            : actionTaken == "Delivered" ? "Delivered"
                            : doc.Status;
                 _context.Update(doc);
+
+                // Auto-register in Approved Documents if status is Approved or Sent
+                if (actionTaken == "Approved" || actionTaken == "Sent")
+                {
+                    var approvedDoc = new ApprovedDocument
+                    {
+                        ReferenceNumber = doc.ReferenceNumber,
+                        Title = doc.Subject,
+                        DocumentType = "Outgoing",
+                        SourceOrDestination = doc.DestinationInstitution,
+                        Description = doc.Subject,
+                        ApprovedDate = DateTime.UtcNow,
+                        ApprovedByUserId = user.Id,
+                        RelatedDocumentId = doc.Id,
+                        FilePath = doc.AttachmentPath ?? doc.SignaturePath,
+                        Status = "Approved",
+                        Remarks = notes,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedById = user.Id
+                    };
+
+                    // Check if already exists to avoid duplicates
+                    if (!await _context.ApprovedDocuments.AnyAsync(a => a.ReferenceNumber == doc.ReferenceNumber))
+                    {
+                        _context.ApprovedDocuments.Add(approvedDoc);
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();
